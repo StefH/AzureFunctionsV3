@@ -39,7 +39,7 @@ steps:
 - task: AzureFunctionApp@1
   displayName: 'Azure Function App Deploy'
   inputs:
-    azureSubscription: 'Visual Studio Enterprise – MPN (ae9255af-d099-4cdc-90a7-241ccb29df68)'
+    azureSubscription: 'Service Connection Azure Functions V3'
     appType: functionAppLinux
     appName: 'stef-function-apps-linux-v3'
     #package: '$(System.DefaultWorkingDirectory)/**/*.zip'
