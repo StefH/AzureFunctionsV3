@@ -4,6 +4,7 @@ pool:
 variables:
   buildConfiguration: 'Release'
   buildProjectFunctions: '**/FunctionsAppV3.csproj'
+  publishToAzure: $(PUBLISH_TO_AZURE)
   tag: '1.0.0'
   buildNumber: $(Build.BuildNumber)
 
@@ -34,3 +35,14 @@ steps:
   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
   inputs:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+
+- task: AzureFunctionApp@1
+  displayName: 'Azure Function App Deploy'
+  inputs:
+    azureSubscription: 'Visual Studio Enterprise – MPN (ae9255af-d099-4cdc-90a7-241ccb29df68)'
+    appType: functionAppLinux
+    appName: 'stef-function-apps-linux-v3'
+    #package: '$(System.DefaultWorkingDirectory)/**/*.zip'
+    package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+    runtimeStack: 'DOCKER|microsoft/azure-functions-dotnet-core2.0:2.0'
+  condition: and(succeeded(), eq(variables.publishToAzure, 'yes'))
