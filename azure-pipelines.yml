@@ -4,13 +4,13 @@ pool:
 variables:
   buildConfiguration: 'Release'
   buildProjectFunctions: '**/FunctionsAppV3.csproj'
-  publishToAzure: $(PUBLISH_TO_AZURE)
+  deployToAzure: $(DEPLOY_TO_AZURE)
   tag: '1.0.0'
   buildNumber: $(Build.BuildNumber)
 
 steps:
 - task: DotNetCoreCLI@2
-  displayName: 'Function : Build'
+  displayName: 'Build'
   inputs:
     command: build
     projects: |
@@ -18,7 +18,7 @@ steps:
     arguments: '--configuration $(BuildConfiguration) /p:Version=1.0.0-$(buildNumber)'
 
 - task: DotNetCoreCLI@2
-  displayName: 'Function : Publish'
+  displayName: 'Publish'
   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
   inputs:
     command: publish
@@ -37,7 +37,7 @@ steps:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
 
 - task: AzureFunctionApp@1
-  displayName: 'Azure Function App Deploy'
+  displayName: 'Deploy'
   inputs:
     azureSubscription: 'Service Connection Azure Functions V3'
     appType: functionAppLinux
@@ -45,4 +45,4 @@ steps:
     #package: '$(System.DefaultWorkingDirectory)/**/*.zip'
     package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
     runtimeStack: 'DOCKER|microsoft/azure-functions-dotnet-core2.0:2.0'
-  condition: and(succeeded(), eq(variables.publishToAzure, 'yes'))
+  condition: and(succeeded(), eq(variables.deployToAzure, 'yes'), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
