@@ -42,7 +42,7 @@ steps:
   inputs:
     azureSubscription: 'Service Connection Azure Functions V3'
     Action: 'Stop Azure App Service'
-    WebAppName: 'stef-function-apps-linux-v3'
+    WebAppName: 'stef-function-app-linux-v3'
 
 - task: AzureRmWebAppDeployment@4
   condition: and(succeeded(), eq(variables.deployToAzure, 'yes'), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
@@ -50,7 +50,7 @@ steps:
   inputs:
     azureSubscription: 'Service Connection Azure Functions V3'
     appType: functionAppLinux
-    WebAppName: 'stef-function-apps-linux-v3'
+    WebAppName: 'stef-function-app-linux-v3'
     packageForLinux: '$(System.DefaultWorkingDirectory)/**/FunctionsAppV3.zip'
     RuntimeStackFunction: 'DOCKER|microsoft/azure-functions-dotnet-core2.0:2.0'  
 
@@ -60,4 +60,4 @@ steps:
   inputs:
     azureSubscription: 'Service Connection Azure Functions V3'
     Action: 'Start Azure App Service'
-    WebAppName: 'stef-function-apps-linux-v3'
+    WebAppName: 'stef-function-app-linux-v3'
