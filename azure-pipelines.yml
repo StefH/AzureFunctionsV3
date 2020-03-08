@@ -1,0 +1,36 @@
+pool:
+  vmImage: 'ubuntu-16.04'
+
+variables:
+  buildConfiguration: 'Release'
+  buildProjectFunctions: '**/FunctionsAppV3.csproj'
+  tag: '1.0.0'
+  buildNumber: $(Build.BuildNumber)
+
+steps:
+- task: DotNetCoreCLI@2
+  displayName: 'Function : Build'
+  inputs:
+    command: build
+    projects: |
+      $(buildProjectFunctions)
+    arguments: '--configuration $(BuildConfiguration) /p:Version=1.0.0-$(buildNumber)'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Function : Publish'
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
+  inputs:
+    command: publish
+    projects: |
+      $(buildProjectFunctions)
+    publishWebProjects: false
+    arguments: '--configuration $(BuildConfiguration) /p:Version=1.0.0-$(BuildNumber) --output $(Build.ArtifactStagingDirectory)'
+    zipAfterPublish: true
+    # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/build/dotnet-core-cli?view=azure-devops#file-structure-for-output-files-is-different-from-previous-builds
+    modifyOutputPath: true
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact'
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
