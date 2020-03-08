@@ -36,13 +36,28 @@ steps:
   inputs:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
 
-- task: AzureFunctionApp@1
-  displayName: 'Deploy'
+- task: AzureAppServiceManage@0
+  condition: and(succeeded(), eq(variables.deployToAzure, 'yes'), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
+  displayName: Stop
+  inputs:
+    azureSubscription: 'Service Connection Azure Functions V3'
+    Action: 'Stop Azure App Service'
+    WebAppName: 'stef-function-apps-linux-v3'
+
+- task: AzureRmWebAppDeployment@4
+  condition: and(succeeded(), eq(variables.deployToAzure, 'yes'), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
+  displayName: Deploy
   inputs:
     azureSubscription: 'Service Connection Azure Functions V3'
     appType: functionAppLinux
-    appName: 'stef-function-apps-linux-v3'
-    #package: '$(System.DefaultWorkingDirectory)/**/*.zip'
-    package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
-    runtimeStack: 'DOCKER|microsoft/azure-functions-dotnet-core2.0:2.0'
+    WebAppName: 'stef-function-apps-linux-v3'
+    packageForLinux: '$(System.DefaultWorkingDirectory)/**/FunctionsAppV3.zip'
+    RuntimeStackFunction: 'DOCKER|microsoft/azure-functions-dotnet-core2.0:2.0'  
+
+- task: AzureAppServiceManage@0
   condition: and(succeeded(), eq(variables.deployToAzure, 'yes'), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
+  displayName: Start
+  inputs:
+    azureSubscription: 'Service Connection Azure Functions V3'
+    Action: 'Start Azure App Service'
+    WebAppName: 'stef-function-apps-linux-v3'
