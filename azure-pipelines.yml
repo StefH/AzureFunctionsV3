@@ -33,8 +33,6 @@ steps:
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact'
   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
 
 - task: AzureAppServiceManage@0
   condition: and(succeeded(), eq(variables.deployToAzure, 'yes'), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
@@ -51,7 +49,7 @@ steps:
     azureSubscription: 'Service Connection Azure Functions V3'
     appType: functionAppLinux
     WebAppName: 'stef-function-app-linux-v3'
-    packageForLinux: '$(System.ArtifactStagingDirectory)/**/FunctionsAppV3.zip'
+    packageForLinux: '$(System.ArtifactsDirectory)/**/*.zip'
     RuntimeStackFunction: 'DOCKER|microsoft/azure-functions-dotnet-core2.0:2.0'  
 
 - task: AzureAppServiceManage@0
