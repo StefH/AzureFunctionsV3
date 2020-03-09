@@ -51,7 +51,7 @@ steps:
     azureSubscription: 'Service Connection Azure Functions V3'
     appType: functionAppLinux
     WebAppName: 'stef-function-app-linux-v3'
-    packageForLinux: '$(System.DefaultWorkingDirectory)/**/FunctionsAppV3.zip'
+    packageForLinux: '$(System.ArtifactStagingDirectory)/**/FunctionsAppV3.zip'
     RuntimeStackFunction: 'DOCKER|microsoft/azure-functions-dotnet-core2.0:2.0'  
 
 - task: AzureAppServiceManage@0
