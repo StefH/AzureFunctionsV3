@@ -41,7 +41,12 @@ stages:
         # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/build/dotnet-core-cli?view=azure-devops#file-structure-for-output-files-is-different-from-previous-builds
         modifyOutputPath: true
 
+    - task: PublishBuildArtifacts@1
+      condition: and(succeeded(), eq(variables['DEPLOY_TO_AZURE'], 'no'))
+      displayName: 'Publish Build Artifact'
+
     - task: PublishPipelineArtifact@1
+      condition: and(succeeded(), eq(variables['DEPLOY_TO_AZURE'], 'yes'))
       displayName: 'Publish Pipeline Artifact'
 
 - stage: deploy
