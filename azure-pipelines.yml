@@ -47,6 +47,7 @@ stages:
   condition: and(succeeded(), eq(variables.deployToAzure, 'yes'), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
   jobs:
   - job: Deploy
+    steps:
     - task: AzureAppServiceManage@0
         displayName: Stop
       inputs:
