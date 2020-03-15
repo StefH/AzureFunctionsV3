@@ -12,9 +12,10 @@ stages:
 - stage: build_and_publish
   displayName: 'Stage 1'
   jobs: 
-  - job: Build
+  - job: build
+    displayName: 'Build'
     steps:
-    - script: echo deployToAzure is set to $(deployToAzure)
+    - script: echo DEPLOY_TO_AZURE is set to $(DEPLOY_TO_AZURE)
     - task: DotNetCoreCLI@2
       displayName: 'Build'
       inputs:
@@ -25,6 +26,7 @@ stages:
 
   - job: publish
     displayName: 'Publish'
+    dependsOn: build
     condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
     steps:
     - task: DotNetCoreCLI@2
@@ -44,6 +46,7 @@ stages:
 
 - stage: deploy
   displayName: 'Stage 2'
+  dependsOn: build_and_publish
   condition: and(succeeded('build_and_publish'), eq(variables['deployToAzure'], 'yes'))
   jobs:
   - job: Deploy
