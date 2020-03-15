@@ -41,9 +41,6 @@ stages:
         # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/build/dotnet-core-cli?view=azure-devops#file-structure-for-output-files-is-different-from-previous-builds
         modifyOutputPath: true
 
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish Build Artifact'
-
     - task: PublishPipelineArtifact@1
       displayName: 'Publish Pipeline Artifact'
 
@@ -71,7 +68,9 @@ stages:
         azureSubscription: 'Service Connection Azure Functions V3'
         appType: functionAppLinux
         WebAppName: 'stef-function-app-linux-v3'
-        packageForLinux: '$(Pipeline.Workspace)/**/*.zip'
+
+        # packageForLinux --> https://stackoverflow.com/questions/56805440/azure-devops-yaml-pipeline-downloaded-artifact-is-empty
+        packageForLinux: '$(Pipeline.Workspace)/**/FunctionsAppV3.zip'
         RuntimeStackFunction: 'DOCKER|microsoft/azure-functions-dotnet-core2.0:2.0'  
 
     - task: AzureAppServiceManage@0
