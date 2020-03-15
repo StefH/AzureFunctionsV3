@@ -10,7 +10,7 @@ variables:
 
 stages:
 - stage: build_and_publish
-  displayName: 'Build and Publish'
+  displayName: 'Stage 1'
   jobs: 
   - job: Build
     steps:
@@ -27,7 +27,7 @@ stages:
     condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
     steps:
     - task: DotNetCoreCLI@2
-      displayName: 'Publish'
+      displayName: 'Publish to Azure'
       inputs:
         command: publish
         projects: |
@@ -42,11 +42,12 @@ stages:
       displayName: 'Publish Artifact'
       condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
 
-
-- stage: Deploy
+- stage: deploy
+  displayName: "Stage 2"
   condition: and(succeeded(), eq(variables.deployToAzure, 'yes'), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
   jobs:
   - job: Deploy
+    displayName: 'Start/Stop and (re)Deploy to Azure'
     steps:
     - task: AzureAppServiceManage@0
       displayName: Stop
