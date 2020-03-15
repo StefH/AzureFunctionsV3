@@ -14,6 +14,7 @@ stages:
   jobs: 
   - job: Build
     steps:
+    - script: echo deployToAzure is set to $(deployToAzure)
     - task: DotNetCoreCLI@2
       displayName: 'Build'
       inputs:
