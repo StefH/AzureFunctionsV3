@@ -42,7 +42,10 @@ stages:
         modifyOutputPath: true
 
     - task: PublishBuildArtifacts@1
-      displayName: 'Publish Artifact'
+      displayName: 'Publish Build Artifact'
+
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publish Pipeline Artifact'
 
 - stage: deploy
   displayName: 'Stage 2'
@@ -52,6 +55,9 @@ stages:
   - job: Deploy
     displayName: 'Start/Stop and (re)Deploy to Azure'
     steps:
+    - task: DownloadPipelineArtifact@2
+      displayName: 'Download artifact from previous job'
+
     - task: AzureAppServiceManage@0
       displayName: Stop
       inputs:
