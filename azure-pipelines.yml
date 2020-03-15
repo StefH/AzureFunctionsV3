@@ -23,11 +23,11 @@ stages:
         arguments: '--configuration $(BuildConfiguration) /p:Version=1.0.0-$(buildNumber)'
 
   - job: publish
-    displayName: 'Publish to Azure'
+    displayName: 'Publish'
     condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
     steps:
     - task: DotNetCoreCLI@2
-      displayName: 'Publish to Azure'
+      displayName: 'Publish'
       inputs:
         command: publish
         projects: |
@@ -43,7 +43,7 @@ stages:
 
 - stage: deploy
   displayName: 'Stage 2'
-  condition: and(succeeded('build_and_publish'), eq(variables.deployToAzure, 'yes'))
+  condition: and(succeeded('build_and_publish'), eq(variables['deployToAzure'], 'yes'))
   jobs:
   - job: Deploy
     displayName: 'Start/Stop and (re)Deploy to Azure'
