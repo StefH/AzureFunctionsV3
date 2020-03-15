@@ -4,7 +4,6 @@ pool:
 variables:
   buildConfiguration: 'Release'
   buildProjectFunctions: '**/FunctionsAppV3.csproj'
-  deployToAzure: $(DEPLOY_TO_AZURE)
   tag: '1.0.0'
   buildNumber: $(Build.BuildNumber)
 
@@ -16,6 +15,7 @@ stages:
     displayName: 'Build'
     steps:
     - script: echo DEPLOY_TO_AZURE is set to $(DEPLOY_TO_AZURE)
+      displayName: 'Show variable'
     - task: DotNetCoreCLI@2
       displayName: 'Build'
       inputs:
@@ -47,7 +47,7 @@ stages:
 - stage: deploy
   displayName: 'Stage 2'
   dependsOn: build_and_publish
-  condition: and(succeeded('build_and_publish'), eq(variables['deployToAzure'], 'yes'))
+  condition: and(succeeded('build_and_publish'), eq($(DEPLOY_TO_AZURE), 'yes'))
   jobs:
   - job: Deploy
     displayName: 'Start/Stop and (re)Deploy to Azure'
