@@ -4,58 +4,83 @@ pool:
 variables:
   buildConfiguration: 'Release'
   buildProjectFunctions: '**/FunctionsAppV3.csproj'
-  deployToAzure: $(DEPLOY_TO_AZURE)
   tag: '1.0.0'
   buildNumber: $(Build.BuildNumber)
 
-steps:
-- task: DotNetCoreCLI@2
-  displayName: 'Build'
-  inputs:
-    command: build
-    projects: |
-      $(buildProjectFunctions)
-    arguments: '--configuration $(BuildConfiguration) /p:Version=1.0.0-$(buildNumber)'
+stages:
+- stage: build_and_publish
+  displayName: 'Stage 1'
+  jobs: 
+  - job: build
+    displayName: 'Build'
+    steps:
+    - script: echo DEPLOY_TO_AZURE is set to $(DEPLOY_TO_AZURE)
+      displayName: 'Show variable'
+    - task: DotNetCoreCLI@2
+      displayName: 'Build'
+      inputs:
+        command: build
+        projects: |
+          $(buildProjectFunctions)
+        arguments: '--configuration $(BuildConfiguration) /p:Version=1.0.0-$(buildNumber)'
 
-- task: DotNetCoreCLI@2
-  displayName: 'Publish'
-  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
-  inputs:
-    command: publish
-    projects: |
-      $(buildProjectFunctions)
-    publishWebProjects: false
-    arguments: '--configuration $(BuildConfiguration) /p:Version=1.0.0-$(BuildNumber) --output $(Build.ArtifactStagingDirectory)'
-    zipAfterPublish: true
-    # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/build/dotnet-core-cli?view=azure-devops#file-structure-for-output-files-is-different-from-previous-builds
-    modifyOutputPath: true
+  - job: publish
+    displayName: 'Publish'
+    dependsOn: build
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
+    steps:
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish'
+      inputs:
+        command: publish
+        projects: |
+         $(buildProjectFunctions)
+        publishWebProjects: false
+        arguments: '--configuration $(BuildConfiguration) /p:Version=1.0.0-$(BuildNumber) --output $(Build.ArtifactStagingDirectory)'
+        zipAfterPublish: true
+        # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/build/dotnet-core-cli?view=azure-devops#file-structure-for-output-files-is-different-from-previous-builds
+        modifyOutputPath: true
 
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact'
-  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
+    - task: PublishBuildArtifacts@1
+      condition: and(succeeded(), eq(variables['DEPLOY_TO_AZURE'], 'no'))
+      displayName: 'Publish Build Artifact'
 
-- task: AzureAppServiceManage@0
-  condition: and(succeeded(), eq(variables.deployToAzure, 'yes'), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
-  displayName: Stop
-  inputs:
-    azureSubscription: 'Service Connection Azure Functions V3'
-    Action: 'Stop Azure App Service'
-    WebAppName: 'stef-function-app-linux-v3'
+    - task: PublishPipelineArtifact@1
+      condition: and(succeeded(), eq(variables['DEPLOY_TO_AZURE'], 'yes'))
+      displayName: 'Publish Pipeline Artifact'
 
-- task: AzureRmWebAppDeployment@4
-  condition: and(succeeded(), eq(variables.deployToAzure, 'yes'), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
-  displayName: Deploy
-  inputs:
-    azureSubscription: 'Service Connection Azure Functions V3'
-    appType: functionAppLinux
-    WebAppName: 'stef-function-app-linux-v3'
-    packageForLinux: '$(System.ArtifactsDirectory)/**/*.zip'
-    RuntimeStackFunction: 'DOCKER|microsoft/azure-functions-dotnet-core2.0:2.0'  
+- stage: deploy
+  displayName: 'Stage 2'
+  dependsOn: build_and_publish
+  condition: and(succeeded(), eq(variables['DEPLOY_TO_AZURE'], 'yes'))
+  jobs:
+  - job: Deploy
+    displayName: 'Start/Stop and (re)Deploy to Azure'
+    steps:
+    - task: DownloadPipelineArtifact@2
+      displayName: 'Download artifact from previous job'
 
-- task: AzureAppServiceManage@0
-  condition: and(succeeded(), eq(variables.deployToAzure, 'yes'), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
-  displayName: Start
-  inputs:
-    azureSubscription: 'Service Connection Azure Functions V3'
-    Action: 'Start Azure App Service'
-    WebAppName: 'stef-function-app-linux-v3'
+    - task: AzureAppServiceManage@0
+      displayName: Stop
+      inputs:
+        azureSubscription: 'Service Connection Azure Functions V3'
+        Action: 'Stop Azure App Service'
+        WebAppName: 'stef-function-app-linux-v3'
+    
+    - task: AzureRmWebAppDeployment@4
+      displayName: Deploy
+      inputs:
+        azureSubscription: 'Service Connection Azure Functions V3'
+        appType: functionAppLinux
+        WebAppName: 'stef-function-app-linux-v3'
+
+        # packageForLinux --> https://stackoverflow.com/questions/56805440/azure-devops-yaml-pipeline-downloaded-artifact-is-empty
+        packageForLinux: '$(Pipeline.Workspace)/**/FunctionsAppV3.zip'
+        RuntimeStackFunction: 'DOCKER|microsoft/azure-functions-dotnet-core2.0:2.0'  
+
+    - task: AzureAppServiceManage@0
+      displayName: Start
+      inputs:
+        azureSubscription: 'Service Connection Azure Functions V3'
+        Action: 'Start Azure App Service'
+        WebAppName: 'stef-function-app-linux-v3'
