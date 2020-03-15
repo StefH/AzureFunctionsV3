@@ -49,7 +49,7 @@ stages:
   - job: Deploy
     steps:
     - task: AzureAppServiceManage@0
-        displayName: Stop
+      displayName: Stop
       inputs:
         azureSubscription: 'Service Connection Azure Functions V3'
         Action: 'Stop Azure App Service'
