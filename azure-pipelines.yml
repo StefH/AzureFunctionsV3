@@ -40,11 +40,10 @@ stages:
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact'
-      condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
 
 - stage: deploy
-  displayName: "Stage 2"
-  condition: and(succeeded('build_and_publish'), eq(deployToAzure, 'yes'), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
+  displayName: 'Stage 2'
+  condition: and(succeeded('build_and_publish'), eq(variables.deployToAzure, 'yes'))
   jobs:
   - job: Deploy
     displayName: 'Start/Stop and (re)Deploy to Azure'
