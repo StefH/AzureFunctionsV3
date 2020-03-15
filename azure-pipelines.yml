@@ -44,7 +44,7 @@ stages:
 
 - stage: deploy
   displayName: "Stage 2"
-  condition: and(succeeded(), eq(variables.deployToAzure, 'yes'), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
+  condition: and(succeeded('build_and_publish'), eq(variables.deployToAzure, 'yes'), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
   jobs:
   - job: Deploy
     displayName: 'Start/Stop and (re)Deploy to Azure'
