@@ -18,9 +18,9 @@ stages:
       displayName: 'Build'
       inputs:
         command: build
-      projects: |
-        $(buildProjectFunctions)
-      arguments: '--configuration $(BuildConfiguration) /p:Version=1.0.0-$(buildNumber)'
+        projects: |
+          $(buildProjectFunctions)
+        arguments: '--configuration $(BuildConfiguration) /p:Version=1.0.0-$(buildNumber)'
 
   - job: publish
     displayName: 'Publish to Azure'
