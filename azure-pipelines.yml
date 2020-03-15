@@ -44,28 +44,28 @@ stages:
 
 
 - stage: Deploy
-    condition: and(succeeded(), eq(variables.deployToAzure, 'yes'), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
-    jobs:
-    - job: Deploy
-      - task: AzureAppServiceManage@0
-          displayName: Stop
-        inputs:
-          azureSubscription: 'Service Connection Azure Functions V3'
-          Action: 'Stop Azure App Service'
-          WebAppName: 'stef-function-app-linux-v3'
-      
-      - task: AzureRmWebAppDeployment@4
-        displayName: Deploy
-        inputs:
-          azureSubscription: 'Service Connection Azure Functions V3'
-          appType: functionAppLinux
-          WebAppName: 'stef-function-app-linux-v3'
-          packageForLinux: '$(System.ArtifactsDirectory)/**/*.zip'
-          RuntimeStackFunction: 'DOCKER|microsoft/azure-functions-dotnet-core2.0:2.0'  
+  condition: and(succeeded(), eq(variables.deployToAzure, 'yes'), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
+  jobs:
+  - job: Deploy
+    - task: AzureAppServiceManage@0
+        displayName: Stop
+      inputs:
+        azureSubscription: 'Service Connection Azure Functions V3'
+        Action: 'Stop Azure App Service'
+        WebAppName: 'stef-function-app-linux-v3'
+    
+    - task: AzureRmWebAppDeployment@4
+      displayName: Deploy
+      inputs:
+        azureSubscription: 'Service Connection Azure Functions V3'
+        appType: functionAppLinux
+        WebAppName: 'stef-function-app-linux-v3'
+        packageForLinux: '$(System.ArtifactsDirectory)/**/*.zip'
+        RuntimeStackFunction: 'DOCKER|microsoft/azure-functions-dotnet-core2.0:2.0'  
 
-      - task: AzureAppServiceManage@0
-        displayName: Start
-        inputs:
-          azureSubscription: 'Service Connection Azure Functions V3'
-          Action: 'Start Azure App Service'
-          WebAppName: 'stef-function-app-linux-v3'
+    - task: AzureAppServiceManage@0
+      displayName: Start
+      inputs:
+        azureSubscription: 'Service Connection Azure Functions V3'
+        Action: 'Start Azure App Service'
+        WebAppName: 'stef-function-app-linux-v3'
