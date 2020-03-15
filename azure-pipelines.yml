@@ -47,7 +47,7 @@ stages:
 - stage: deploy
   displayName: 'Stage 2'
   dependsOn: build_and_publish
-  condition: and(succeeded('build_and_publish'), eq($(DEPLOY_TO_AZURE), 'yes'))
+  condition: and(succeeded('build_and_publish'), eq('$(DEPLOY_TO_AZURE)', 'yes'))
   jobs:
   - job: Deploy
     displayName: 'Start/Stop and (re)Deploy to Azure'
