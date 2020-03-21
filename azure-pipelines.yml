@@ -6,7 +6,7 @@ variables:
   buildProjectFunctions: '**/FunctionsAppV3.csproj'
   tag: '1.0.0'
   buildNumber: $(Build.BuildNumber)
-  webAppName: 'stef-function-app-linux-v3a'
+  webAppName: 'stef-function-app-linux-v3c'
 
 stages:
 - stage: build_and_publish
