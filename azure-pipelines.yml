@@ -80,7 +80,7 @@ stages:
         runtimeStack: 'DOCKER|microsoft/azure-functions-dotnet-core3.0:3.0'
     
     - task: AzureRmWebAppDeployment@4
-      condition: and(succeeded(), eq(variables['RM'], 'no'))
+      condition: and(succeeded(), eq(variables['RM'], 'yes'))
       displayName: 'Deploy Function via AzureRmWebAppDeployment@4'
       inputs:
         azureSubscription: 'Service Connection Azure Functions V3'
