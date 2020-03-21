@@ -6,7 +6,7 @@ variables:
   buildProjectFunctions: '**/FunctionsAppV3.csproj'
   tag: '1.0.0'
   buildNumber: $(Build.BuildNumber)
-  webAppName: 'stef-function-app-linux-v3a'
+  webAppName: 'stef-function-app-linux-v3b'
 
 stages:
 - stage: build_and_publish
@@ -67,9 +67,21 @@ stages:
         azureSubscription: 'Service Connection Azure Functions V3'
         Action: 'Stop Azure App Service'
         WebAppName: $(webAppName)
+
+    - task: AzureFunctionApp@1
+      condition: and(succeeded(), eq(variables['RM'], 'no'))
+      displayName: 'Deploy Function via AzureFunctionApp@1'
+      inputs:
+        azureSubscription: 'Service Connection Azure Functions V3'
+        appType: functionAppLinux
+        appName: $(webAppName)
+        package: '$(Pipeline.Workspace)/**/FunctionsAppV3.zip'
+        #runtimeStack: 'DOCKER|microsoft/azure-functions-dotnet-core2.0:2.0'
+        runtimeStack: 'DOCKER|microsoft/azure-functions-dotnet-core3.0:3.0'
     
     - task: AzureRmWebAppDeployment@4
-      displayName: Deploy
+      condition: and(succeeded(), eq(variables['RM'], 'no'))
+      displayName: 'Deploy Function via AzureRmWebAppDeployment@4'
       inputs:
         azureSubscription: 'Service Connection Azure Functions V3'
         appType: functionAppLinux
@@ -77,7 +89,7 @@ stages:
 
         # packageForLinux --> https://stackoverflow.com/questions/56805440/azure-devops-yaml-pipeline-downloaded-artifact-is-empty
         packageForLinux: '$(Pipeline.Workspace)/**/FunctionsAppV3.zip'
-        RuntimeStackFunction: 'DOCKER|microsoft/azure-functions-dotnet-core2.0:2.0'  
+        RuntimeStackFunction: 'DOCKER|microsoft/azure-functions-dotnet-core3.0:3.0'
 
     - task: AzureAppServiceManage@0
       displayName: Start
