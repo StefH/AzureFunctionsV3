@@ -1,3 +1,0 @@
-name: Pulumi-demo
-runtime: dotnet
-description: A minimal Azure C# Pulumi program
