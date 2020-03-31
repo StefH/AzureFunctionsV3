@@ -1,0 +1,7 @@
+﻿az login
+
+az account set --subscription ae...
+
+cd Pulumi
+dotnet publish ../FunctionsAppV3 -o ../publish -c Release
+pulumi preview

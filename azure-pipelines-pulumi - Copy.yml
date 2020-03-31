@@ -1,0 +1,55 @@
+pool:
+  vmImage: 'ubuntu-16.04'
+
+variables:
+  buildConfiguration: 'Release'
+  buildProjectFunctions: '**/FunctionsAppV3.csproj'
+  tag: '1.0.0'
+  buildNumber: $(Build.BuildNumber)
+  webAppName: 'stef-function-app-linux-v3c'
+
+stages:
+- stage: build_and_publish
+  displayName: 'Stage 1'
+  jobs: 
+  - job: publish
+    displayName: 'Publish'
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
+    steps:
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish'
+      inputs:
+        command: publish
+        projects: |
+         $(buildProjectFunctions)
+        publishWebProjects: false
+        arguments: '--configuration $(BuildConfiguration) /p:Version=1.0.0-$(BuildNumber) --output $(Build.ArtifactStagingDirectory)'
+        zipAfterPublish: true
+        # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/build/dotnet-core-cli?view=azure-devops#file-structure-for-output-files-is-different-from-previous-builds
+        modifyOutputPath: true
+
+    - task: PublishBuildArtifacts@1
+      condition: and(succeeded(), eq(variables['DEPLOY_TO_AZURE'], 'no'))
+      displayName: 'Publish Build Artifact'
+
+    - task: PublishPipelineArtifact@1
+      condition: and(succeeded(), eq(variables['DEPLOY_TO_AZURE'], 'yes'))
+      displayName: 'Publish Pipeline Artifact'
+
+- stage: deploy
+  displayName: 'Stage 2'
+  dependsOn: build_and_publish
+  condition: and(succeeded(), eq(variables['DEPLOY_TO_AZURE'], 'yes'))
+  jobs:
+  - job: Deploy
+    displayName: 'Deploy via Pulumi'
+    steps:
+    - task: pulumi.build-and-release-task.custom-build-release-task.Pulumi@1
+      displayName: 'Run pulumi - preview'
+      inputs:
+        azureSubscription: 'Service Connection for Pulumi'
+        command: preview
+        cwd: "Pulumi"
+        stack: "StefH/azure-function-v3-linux/dev"
+      env:
+        PULUMI_ACCESS_TOKEN: $(PULUMI_ACCESS_TOKEN)

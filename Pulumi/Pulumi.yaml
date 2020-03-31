@@ -1,0 +1,3 @@
+name: azure-function-v3-linux
+description: Create Azure Function V3
+runtime: dotnet

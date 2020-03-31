@@ -77,7 +77,7 @@ stages:
         appName: $(webAppName)
         package: '$(Pipeline.Workspace)/**/FunctionsAppV3.zip'
         #runtimeStack: 'DOCKER|microsoft/azure-functions-dotnet-core2.0:2.0'
-        runtimeStack: 'DOCKER|microsoft/azure-functions-dotnet-core3.0:3.0'
+        runtimeStack: 'DOCKER|mcr.microsoft.com/azure-functions/dotnet:3.0'
     
     - task: AzureRmWebAppDeployment@4
       condition: and(succeeded(), eq(variables['RM'], 'yes'))
@@ -89,7 +89,7 @@ stages:
 
         # packageForLinux --> https://stackoverflow.com/questions/56805440/azure-devops-yaml-pipeline-downloaded-artifact-is-empty
         packageForLinux: '$(Pipeline.Workspace)/**/FunctionsAppV3.zip'
-        RuntimeStackFunction: 'DOCKER|microsoft/azure-functions-dotnet-core3.0:3.0'
+        RuntimeStackFunction: 'DOCKER|mcr.microsoft.com/azure-functions/dotnet:3.0'
 
     - task: AzureAppServiceManage@0
       displayName: Start
