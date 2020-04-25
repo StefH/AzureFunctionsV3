@@ -29,8 +29,8 @@ namespace Pulumi.Azure.Function
             var storageAccount = new Account("stefsapulumi", new AccountArgs
             {
                 ResourceGroupName = resourceGroup.Name,
-                AccountReplicationType = AccountReplicationTypes.LocallyRedundantStorage,
-                AccountTier = AccountTiers.Standard
+                AccountReplicationType = StorageAccountReplicationTypes.LocallyRedundantStorage,
+                AccountTier = StorageAccountTiers.Standard
             });
 
             Plan appServicePlan;
@@ -41,12 +41,12 @@ namespace Pulumi.Azure.Function
                     ResourceGroupName = resourceGroup.Name,
 
                     // Possible values are `Windows` (also available as `App`), `Linux`, `elastic` (for Premium Consumption) and `FunctionApp` (for a Consumption Plan).
-                    Kind = PlanSkuKinds.Linux,
+                    Kind = AppServicePlanSkuKinds.Linux,
 
                     Sku = new PlanSkuArgs
                     {
                         Tier = AppServicePlanTiers.PremiumV2,
-                        Size = PlanSkuArgsSizes.PremiumV2Small
+                        Size = AppServicePlanSkuSizes.PremiumV2Small
                     },
 
                     // For Linux, you need to change the plan to have Reserved = true property.
