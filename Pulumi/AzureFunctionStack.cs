@@ -3,6 +3,7 @@ using System.IO;
 using Pulumi.Azure.AppInsights;
 using Pulumi.Azure.AppService;
 using Pulumi.Azure.AppService.Inputs;
+using Pulumi.Azure.Constants;
 using Pulumi.Azure.Core;
 using Pulumi.Azure.Storage;
 
@@ -28,8 +29,8 @@ namespace Pulumi.Azure.Function
             var storageAccount = new Account("stefsapulumi", new AccountArgs
             {
                 ResourceGroupName = resourceGroup.Name,
-                AccountReplicationType = "LRS",
-                AccountTier = "Standard"
+                AccountReplicationType = AccountReplicationTypes.LocallyRedundantStorage,
+                AccountTier = AccountTiers.Standard
             });
 
             Plan appServicePlan;
@@ -40,12 +41,12 @@ namespace Pulumi.Azure.Function
                     ResourceGroupName = resourceGroup.Name,
 
                     // Possible values are `Windows` (also available as `App`), `Linux`, `elastic` (for Premium Consumption) and `FunctionApp` (for a Consumption Plan).
-                    Kind = "Linux",
+                    Kind = PlanSkuKinds.Linux,
 
                     Sku = new PlanSkuArgs
                     {
-                        Tier = "PremiumV2",
-                        Size = "P1v2"
+                        Tier = AppServicePlanTiers.PremiumV2,
+                        Size = PlanSkuArgsSizes.PremiumV2Small
                     },
 
                     // For Linux, you need to change the plan to have Reserved = true property.
@@ -61,7 +62,7 @@ namespace Pulumi.Azure.Function
             var container = new Container("azure-function-zips", new ContainerArgs
             {
                 StorageAccountName = storageAccount.Name,
-                ContainerAccessType = "private"
+                ContainerAccessType = ContainerAccessTypes.Private
             });
 
             string currentDirectory = Directory.GetCurrentDirectory();
@@ -77,7 +78,7 @@ namespace Pulumi.Azure.Function
             {
                 StorageAccountName = storageAccount.Name,
                 StorageContainerName = container.Name,
-                Type = "Block",
+                Type = BlobTypes.Block,
 
                 // The published folder contains a 'zip' file
                 Source = new FileArchive(functionsAppPublishDirectory)
@@ -88,7 +89,7 @@ namespace Pulumi.Azure.Function
             var insights = new Insights("stef-ai-fa-l-v3p", new InsightsArgs
             {
                 ResourceGroupName = resourceGroup.Name,
-                ApplicationType = "web"
+                ApplicationType = InsightsApplicationTypes.Web
             });
 
             var functionApp = new FunctionApp("stef-function-app-linux-v3p", new FunctionAppArgs
@@ -113,11 +114,11 @@ namespace Pulumi.Azure.Function
                 StorageConnectionString = storageAccount.PrimaryConnectionString,
 
                 // Make sure a version 3 functionApp is created based on a 3.0 docker image
-                Version = "~3",
-                OsType = "linux",
+                Version = FunctionAppVersions.V3,
+                OsType = FunctionAppOsTypes.Linux,
                 SiteConfig = new FunctionAppSiteConfigArgs
                 {
-                    LinuxFxVersion = "DOCKER|mcr.microsoft.com/azure-functions/dotnet:3.0",
+                    LinuxFxVersion = FunctionAppSiteConfigLinuxFxVersions.V3,
                     AlwaysOn = false,
                     WebsocketsEnabled = false
                 },
