@@ -43,6 +43,7 @@ stages:
         azureSubscription: 'Service Connection for Pulumi'
         command: up
         cwd: "Pulumi"
+        args: "--yes"
         stack: "StefH/azure-function-v3-linux/dev"
       env:
         PULUMI_ACCESS_TOKEN: $(PULUMI_ACCESS_TOKEN)
