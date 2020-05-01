@@ -98,7 +98,7 @@ namespace Pulumi.Azure.Function
                 AppServicePlanId = appServicePlan.Id,
                 AppSettings =
                 {
-                    { "runtime", "dotnet" },
+                    { "runtime", FunctionAppWorkerRuntimes.DotNet },
                     { "DOCKER_REGISTRY_SERVER_URL", "https://index.docker.io" },
                     { "WEBSITE_ENABLE_SYNC_UPDATE_SITE", "true" },
                     { "WEBSITES_ENABLE_APP_SERVICE_STORAGE", "true" },
@@ -118,7 +118,7 @@ namespace Pulumi.Azure.Function
                 OsType = FunctionAppOsTypes.Linux,
                 SiteConfig = new FunctionAppSiteConfigArgs
                 {
-                    LinuxFxVersion = FunctionAppSiteConfigLinuxFxVersions.V3,
+                    LinuxFxVersion = FunctionAppSiteConfigLinuxFxVersions.DotNetV3,
                     AlwaysOn = false,
                     WebsocketsEnabled = false
                 },
