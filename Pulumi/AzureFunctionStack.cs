@@ -111,7 +111,11 @@ namespace Pulumi.Azure.Function
                     { "APPLICATIONINSIGHTS_CONNECTION_STRING", Output.Format($"InstrumentationKey={insights.InstrumentationKey}") }
                 },
 
-                StorageConnectionString = storageAccount.PrimaryConnectionString,
+                // "storage_connection_string": [DEPRECATED] Deprecated in favor of `storage_account_name` and `storage_account_access_key`
+                StorageAccountName = storageAccount.Name,
+                StorageAccountAccessKey = storageAccount.PrimaryAccessKey,
+
+                // StorageConnectionString = storageAccount.PrimaryConnectionString,
 
                 // Make sure a version 3 functionApp is created based on a 3.0 docker image
                 Version = FunctionAppVersions.V3,
